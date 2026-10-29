@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Glass Weather</title>
+  <meta name="description" content="A glassmorphic weather app powered by the Open-Meteo API. Default location: Boca Raton, FL." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-sky="clear-day">
+  <div class="bg">
+    <span class="blob blob-1"></span>
+    <span class="blob blob-2"></span>
+    <span class="blob blob-3"></span>
+  </div>
+
+  <main class="app">
+    <header class="glass topbar">
+      <form id="search-form" class="search" autocomplete="off">
+        <input id="search-input" type="search" placeholder="Search a city…" aria-label="Search a city" />
+        <button type="submit" aria-label="Search">🔍</button>
+        <ul id="suggestions" class="glass suggestions" hidden></ul>
+      </form>
+      <div class="actions">
+        <button id="locate-btn" class="pill" type="button" title="Use my location">📍</button>
+        <button id="unit-btn" class="pill" type="button" title="Toggle units">°F</button>
+      </div>
+    </header>
+
+    <section class="glass current" aria-live="polite">
+      <div id="status" class="status">Loading weather…</div>
+      <div id="current-content" class="current-content" hidden>
+        <div class="place">
+          <h1 id="place-name">Boca Raton</h1>
+          <p id="place-sub">Florida, United States</p>
+          <p id="local-time" class="muted"></p>
+        </div>
+        <div class="now">
+          <div id="now-icon" class="now-icon">☀️</div>
+          <div>
+            <div id="now-temp" class="now-temp">--°</div>
+            <div id="now-desc" class="now-desc">--</div>
+            <div id="now-hilo" class="muted">H: --° · L: --°</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="details">
+      <div class="glass tile"><span class="tile-label">Feels like</span><span id="d-feels" class="tile-value">--</span></div>
+      <div class="glass tile"><span class="tile-label">Humidity</span><span id="d-humidity" class="tile-value">--</span></div>
+      <div class="glass tile"><span class="tile-label">Wind</span><span id="d-wind" class="tile-value">--</span></div>
+      <div class="glass tile"><span class="tile-label">UV index</span><span id="d-uv" class="tile-value">--</span></div>
+      <div class="glass tile"><span class="tile-label">Precipitation</span><span id="d-precip" class="tile-value">--</span></div>
+      <div class="glass tile"><span class="tile-label">Sunrise / Sunset</span><span id="d-sun" class="tile-value small">--</span></div>
+    </section>
+
+    <section class="glass panel">
+      <h2>Next 24 hours</h2>
+      <div id="hourly" class="hourly"></div>
+    </section>
+
+    <section class="glass panel">
+      <h2>7-day forecast</h2>
+      <ul id="daily" class="daily"></ul>
+    </section>
+
+    <footer class="footer">
+      Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
