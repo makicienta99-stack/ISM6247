@@ -1,5 +1,7 @@
 // Glass Weather — powered by the free Open-Meteo API (no API key required).
 
+const DEFAULT_NAME = "Eliana";
+
 const DEFAULT_LOCATION = {
   name: "Boca Raton",
   admin1: "Florida",
@@ -49,7 +51,7 @@ const state = {
   location: loadSaved("gw-location") || DEFAULT_LOCATION,
   unit: loadSaved("gw-unit") || "fahrenheit",
   theme: loadSaved("gw-theme") || "system",
-  name: loadSaved("gw-name") || "",
+  name: loadSaved("gw-name") ?? DEFAULT_NAME,
 };
 
 function loadSaved(key) {
