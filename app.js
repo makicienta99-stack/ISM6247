@@ -48,6 +48,8 @@ const $ = (id) => document.getElementById(id);
 const state = {
   location: loadSaved("gw-location") || DEFAULT_LOCATION,
   unit: loadSaved("gw-unit") || "fahrenheit",
+  theme: loadSaved("gw-theme") || "system",
+  name: loadSaved("gw-name") || "",
 };
 
 function loadSaved(key) {
@@ -151,6 +153,9 @@ function render(data) {
   $("now-hilo").textContent =
     `H: ${Math.round(daily.temperature_2m_max[0])}${deg} · L: ${Math.round(daily.temperature_2m_min[0])}${deg}`;
 
+  $("greet-sub").textContent =
+    `It's ${Math.round(current.temperature_2m)}${deg} and ${cur.text.toLowerCase()} in ${loc.name}.`;
+
   $("d-feels").textContent = `${Math.round(current.apparent_temperature)}${deg}`;
   $("d-humidity").textContent = `${current.relative_humidity_2m}%`;
   $("d-wind").textContent =
@@ -215,6 +220,7 @@ function showStatus(message, isError = false) {
 
 async function load() {
   $("unit-btn").textContent = state.unit === "fahrenheit" ? "°F" : "°C";
+  updateGreeting();
   if ($("current-content").hidden) showStatus("Loading weather…");
   try {
     render(await fetchWeather(state.location));
@@ -332,6 +338,65 @@ $("locate-btn").addEventListener("click", () => {
     () => alert("Couldn't get your location. Please allow location access or search for a city.")
   );
 });
+
+// ---------- Greeting ----------
+
+function updateGreeting() {
+  const hour = new Date().getHours();
+  const part = hour >= 5 && hour < 12 ? "Good morning" : hour >= 12 && hour < 17 ? "Good afternoon" : "Good evening";
+  $("greet-text").textContent = state.name ? `${part}, ${state.name}! 👋` : `${part}! 👋`;
+  $("name-edit").textContent = state.name ? "Change name" : "Set your name";
+}
+
+$("name-edit").addEventListener("click", () => {
+  $("name-edit").hidden = true;
+  $("name-form").hidden = false;
+  $("name-input").value = state.name;
+  $("name-input").focus();
+});
+
+$("name-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  state.name = $("name-input").value.trim();
+  save("gw-name", state.name);
+  $("name-form").hidden = true;
+  $("name-edit").hidden = false;
+  updateGreeting();
+});
+
+$("name-input").addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    $("name-form").hidden = true;
+    $("name-edit").hidden = false;
+  }
+});
+
+// ---------- Theme (light / dark / system) ----------
+
+const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+
+function applyTheme() {
+  const dark = state.theme === "dark" || (state.theme === "system" && systemDark.matches);
+  document.documentElement.dataset.mode = dark ? "dark" : "light";
+  document.querySelectorAll("[data-theme-choice]").forEach((btn) => {
+    btn.setAttribute("aria-checked", String(btn.dataset.themeChoice === state.theme));
+  });
+}
+
+document.querySelectorAll("[data-theme-choice]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    state.theme = btn.dataset.themeChoice;
+    save("gw-theme", state.theme);
+    applyTheme();
+  });
+});
+
+// Follow the device setting live while "System" is selected
+systemDark.addEventListener("change", () => {
+  if (state.theme === "system") applyTheme();
+});
+
+applyTheme();
 
 // Refresh every 15 minutes while the page is open
 setInterval(load, 15 * 60 * 1000);

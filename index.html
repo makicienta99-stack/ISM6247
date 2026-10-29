@@ -9,6 +9,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <script>
+    // Apply the saved theme before first paint to avoid a flash of the wrong colors
+    (function () {
+      var choice = "system";
+      try { choice = JSON.parse(localStorage.getItem("gw-theme")) || "system"; } catch (e) {}
+      var dark = choice === "dark" ||
+        (choice === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.dataset.mode = dark ? "dark" : "light";
+    })();
+  </script>
 </head>
 <body data-sky="clear-day">
   <div class="bg">
@@ -29,6 +39,23 @@
         <button id="unit-btn" class="pill" type="button" title="Toggle units">°F</button>
       </div>
     </header>
+
+    <section class="glass greet-bar">
+      <div class="greeting">
+        <p id="greet-text" class="greet-text">Hello! 👋</p>
+        <p id="greet-sub" class="greet-sub"></p>
+        <button id="name-edit" class="link-btn" type="button">Set your name</button>
+        <form id="name-form" class="name-form" hidden>
+          <input id="name-input" type="text" maxlength="30" placeholder="Your name" aria-label="Your name" autocomplete="given-name" />
+          <button class="pill" type="submit">Save</button>
+        </form>
+      </div>
+      <div class="theme-switch" role="radiogroup" aria-label="Theme">
+        <button type="button" role="radio" data-theme-choice="light" aria-checked="false">☀️ <span>Light</span></button>
+        <button type="button" role="radio" data-theme-choice="dark" aria-checked="false">🌙 <span>Dark</span></button>
+        <button type="button" role="radio" data-theme-choice="system" aria-checked="false">💻 <span>System</span></button>
+      </div>
+    </section>
 
     <section class="glass current" aria-live="polite">
       <div id="status" class="status">Loading weather…</div>
