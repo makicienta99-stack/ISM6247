@@ -198,7 +198,8 @@ function mergeCanvas(parsed) {
     };
   });
   const added = fresh.filter((f) => !old.has(f.uid)).length;
-  state.items = state.items.filter((i) => i.source !== "canvas").concat(fresh);
+  // Real Canvas data replaces any sample deadlines
+  state.items = state.items.filter((i) => i.source !== "canvas" && i.source !== "demo").concat(fresh);
   persistItems();
   return { total: fresh.length, added };
 }
@@ -357,7 +358,7 @@ function itemRow(it) {
           <span class="course-chip"><span class="dot" style="background:${courseColor(it.course)}"></span>${esc(shortCourse(it.course))}</span>
           <span>${fmtDate(due)}${it.allDay ? "" : " · " + fmtTime(due)}</span>
           <span class="${relCls}">${rel}</span>
-          ${it.source === "canvas" ? '<span title="Imported from Canvas">🔄 Canvas</span>' : ""}
+          ${it.source === "canvas" ? '<span title="Imported from Canvas">🔄 Canvas</span>' : it.source === "demo" ? '<span title="Sample data">👀 Sample</span>' : ""}
         </div>
       </div>
       <div class="item-side">
@@ -696,6 +697,13 @@ function bind() {
     } catch { toast("Could not read that backup file."); }
     e.target.value = "";
   });
+  $("demo-btn").addEventListener("click", loadDemo);
+  $("clear-demo-btn").addEventListener("click", () => {
+    state.items = state.items.filter((i) => i.source !== "demo");
+    persistItems();
+    renderAll();
+    toast("Sample deadlines removed.");
+  });
   $("clear-canvas-btn").addEventListener("click", () => {
     if (!confirm("Remove all items imported from Canvas? Your manual deadlines stay.")) return;
     state.items = state.items.filter((i) => i.source !== "canvas");
@@ -712,6 +720,31 @@ function bind() {
 
   // Keep countdowns fresh
   setInterval(() => { renderTodo(); renderSidebar(); renderDashboard(); }, 60000);
+}
+
+// ---------- Sample data (preview what the planner looks like) ----------
+
+function loadDemo() {
+  const at = (days, h, m = 59) => { const d = startOfDay(new Date()); d.setDate(d.getDate() + days); d.setHours(h, m); return d.toISOString(); };
+  const AI = "ISM6247-001 Business Innovation with AI";
+  const DM = "ISM6136-002 Data Mining";
+  const ST = "QMB6603-001 Business Analytics Statistics";
+  const demo = [
+    ["Discussion 5: AI in Retail", DM, "homework", at(-1, 23)],
+    ["Homework 4: AI Use Cases", AI, "homework", at(0, 23)],
+    ["Quiz 3: Generative AI", AI, "quiz", at(2, 18, 0)],
+    ["Problem Set 6", ST, "homework", at(3, 23)],
+    ["Group Project Proposal", DM, "project", at(6, 23)],
+    ["Midterm Exam", ST, "exam", at(9, 17, 0)],
+    ["Case Study Presentation", AI, "project", at(16, 12, 0)],
+    ["Final Exam", DM, "exam", at(35, 10, 30)],
+  ];
+  state.items = state.items.filter((i) => i.source !== "demo").concat(
+    demo.map(([title, course, type, due], n) => ({ id: "demo-" + n, source: "demo", title, course, type, due, allDay: false, url: "", notes: "Sample deadline", done: false }))
+  );
+  persistItems();
+  renderAll();
+  toast("Sample deadlines added. They disappear when you sync Canvas.");
 }
 
 // ---------- Start ----------

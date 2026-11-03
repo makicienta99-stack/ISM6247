@@ -61,7 +61,8 @@
           <h3 class="section-title">Course Cards</h3>
           <div id="dash-cards" class="course-cards"></div>
           <p id="dash-empty" class="empty" hidden>
-            No deadlines yet. Go to <a href="#sync">Canvas Sync</a> to import your FAU Canvas calendar, or click <b>+ Add deadline</b>.
+            No deadlines yet. Go to <a href="#sync">Canvas Sync</a> to import your FAU Canvas calendar, or click <b>+ Add deadline</b>.<br /><br />
+            <button id="demo-btn" class="btn btn-primary" type="button">👀 Show sample deadlines</button>
           </p>
         </section>
 
@@ -146,6 +147,7 @@
             <div class="btn-row">
               <button id="export-btn" class="btn btn-secondary" type="button">⬇️ Export backup</button>
               <label class="btn btn-secondary file-btn">⬆️ Restore backup<input id="restore-file" type="file" accept="application/json" hidden /></label>
+              <button id="clear-demo-btn" class="btn btn-secondary" type="button">Remove sample deadlines</button>
               <button id="clear-canvas-btn" class="btn btn-danger" type="button">Remove Canvas items</button>
               <button id="reset-btn" class="btn btn-danger" type="button">Reset everything</button>
             </div>
@@ -171,7 +173,7 @@
     </div>
 
     <footer class="footer">
-      Student-made planner for FAU Owls. Not affiliated with Florida Atlantic University or Instructure Canvas.
+      Owl Deadlines v1.1 · Student-made planner for FAU Owls. Not affiliated with Florida Atlantic University or Instructure Canvas.
     </footer>
   </div>
 
