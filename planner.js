@@ -498,6 +498,7 @@ function renderAll() {
   renderCourses();
   renderSidebar();
   renderSyncStatus();
+  renderDemoBanner();
 }
 
 // ---------- Routing ----------
@@ -697,7 +698,8 @@ function bind() {
     } catch { toast("Could not read that backup file."); }
     e.target.value = "";
   });
-  $("demo-btn").addEventListener("click", loadDemo);
+  $("demo-btn").addEventListener("click", () => loadDemo());
+  $("banner-remove").addEventListener("click", () => $("clear-demo-btn").click());
   $("clear-demo-btn").addEventListener("click", () => {
     state.items = state.items.filter((i) => i.source !== "demo");
     persistItems();
@@ -724,33 +726,69 @@ function bind() {
 
 // ---------- Sample data (preview what the planner looks like) ----------
 
-function loadDemo() {
-  const at = (days, h, m = 59) => { const d = startOfDay(new Date()); d.setDate(d.getDate() + days); d.setHours(h, m); return d.toISOString(); };
-  const AI = "ISM6247-001 Business Innovation with AI";
-  const DM = "ISM6136-002 Data Mining";
-  const ST = "QMB6603-001 Business Analytics Statistics";
-  const demo = [
-    ["Discussion 5: AI in Retail", DM, "homework", at(-1, 23)],
-    ["Homework 4: AI Use Cases", AI, "homework", at(0, 23)],
-    ["Quiz 3: Generative AI", AI, "quiz", at(2, 18, 0)],
-    ["Problem Set 6", ST, "homework", at(3, 23)],
-    ["Group Project Proposal", DM, "project", at(6, 23)],
-    ["Midterm Exam", ST, "exam", at(9, 17, 0)],
-    ["Case Study Presentation", AI, "project", at(16, 12, 0)],
-    ["Final Exam", DM, "exam", at(35, 10, 30)],
-  ];
+// Imaginary MSBA semester at FAU — dates are relative to today so the demo always looks current.
+const DEMO_COURSES = {
+  AI: "ISM6247-001 Business Innovation with AI",
+  DM: "ISM6136-002 Data Mining",
+  ST: "QMB6603-001 Business Analytics Statistics",
+  DB: "ISM6218-001 Database Management",
+  VZ: "ISM6419-001 Data Visualization",
+};
+const DEMO_ITEMS = [
+  // [title, course, type, daysFromToday, hour, minute, done, notes]
+  ["Module 8 Reading Reflection", "AI", "homework", -4, 23, 59, true, "Reflection on AI adoption at small businesses."],
+  ["SQL Lab 5: Joins & Subqueries", "DB", "homework", -3, 23, 59, true, "Submit the .sql file and screenshots."],
+  ["Quiz 4: Regression Basics", "ST", "quiz", -2, 21, 0, true, "20 questions, 40 minutes, Respondus LockDown."],
+  ["Discussion 5: AI in Retail", "DM", "homework", -1, 23, 59, false, "Initial post + reply to 2 classmates."],
+  ["Dashboard Critique Memo", "VZ", "homework", -1, 18, 0, false, "1-page memo critiquing a public Tableau dashboard."],
+  ["Homework 4: AI Use Cases", "AI", "homework", 0, 23, 59, false, "Identify 3 AI use cases for a local business."],
+  ["Quiz 3: Generative AI", "AI", "quiz", 0, 20, 0, false, "Covers chapters 6–7. Open book."],
+  ["Problem Set 6: Hypothesis Testing", "ST", "homework", 1, 23, 59, false, "Use Excel or R. Show all work."],
+  ["Tableau Lab 3: Maps & Filters", "VZ", "homework", 2, 23, 59, false, "Publish to Tableau Public and submit the link."],
+  ["Quiz 5: Classification Trees", "DM", "quiz", 3, 18, 0, false, "Chapters 9–10."],
+  ["ER Diagram Assignment", "DB", "homework", 4, 23, 59, false, "Design the database for a campus bookstore."],
+  ["Group Project Proposal", "DM", "project", 5, 23, 59, false, "Team of 4. Dataset, question and method (2 pages)."],
+  ["Midterm Exam", "ST", "exam", 7, 17, 0, false, "In person, Boca Raton campus, bring a calculator."],
+  ["AI Innovation Pitch Deck", "AI", "project", 9, 12, 0, false, "10-slide pitch for an AI-powered startup idea."],
+  ["Database Midterm Exam", "DB", "exam", 11, 19, 0, false, "Online via Canvas. ER diagrams + SQL."],
+  ["Homework 5: Prompt Engineering", "AI", "homework", 12, 23, 59, false, ""],
+  ["Visualization Storyboard", "VZ", "project", 14, 23, 59, false, "Storyboard for the final dashboard project."],
+  ["Quiz 6: ANOVA", "ST", "quiz", 15, 21, 0, false, ""],
+  ["Case Study Presentation", "AI", "project", 18, 12, 0, false, "15-minute team presentation in class."],
+  ["Data Mining Project Milestone 2", "DM", "project", 21, 23, 59, false, "Cleaned dataset + exploratory analysis."],
+  ["Final Database Project", "DB", "project", 28, 23, 59, false, "Working database + documentation + demo video."],
+  ["Final Dashboard Project", "VZ", "project", 31, 23, 59, false, "Interactive Tableau dashboard + 5-min video."],
+  ["Final Exam", "ST", "exam", 33, 10, 30, false, "Cumulative. In person, Boca Raton campus."],
+  ["Final Exam", "DM", "exam", 35, 10, 30, false, "Cumulative. Online via Canvas."],
+  ["Final Reflection Paper", "AI", "project", 36, 23, 59, false, "3–5 pages on what you learned about AI and innovation."],
+];
+
+function loadDemo({ quiet = false } = {}) {
+  const at = (days, h, m) => { const d = startOfDay(new Date()); d.setDate(d.getDate() + days); d.setHours(h, m); return d.toISOString(); };
   state.items = state.items.filter((i) => i.source !== "demo").concat(
-    demo.map(([title, course, type, due], n) => ({ id: "demo-" + n, source: "demo", title, course, type, due, allDay: false, url: "", notes: "Sample deadline", done: false }))
+    DEMO_ITEMS.map(([title, c, type, days, h, m, done, notes], n) => ({
+      id: "demo-" + n, source: "demo", title, course: DEMO_COURSES[c], type, due: at(days, h, m),
+      allDay: false, url: "", notes, done,
+    }))
   );
+  state.prefs.demoSeeded = true;
+  persistPrefs();
   persistItems();
   renderAll();
-  toast("Sample deadlines added. They disappear when you sync Canvas.");
+  if (!quiet) toast("Sample deadlines added. They disappear when you sync Canvas.");
+}
+
+function renderDemoBanner() {
+  $("demo-banner").hidden = !state.items.some((i) => i.source === "demo");
 }
 
 // ---------- Start ----------
 
 bind();
 route();
+if (!state.prefs.feedUrl && (state.items.some((i) => i.source === "demo") || (!state.prefs.demoSeeded && !state.items.length))) {
+  loadDemo({ quiet: true });
+}
 renderAll();
 loadWeather();
 if (state.prefs.feedUrl && Date.now() - state.prefs.lastSync > AUTO_SYNC_MS) syncCanvas({ silent: true });
