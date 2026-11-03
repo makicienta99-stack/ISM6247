@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Owl Deadlines</title>
+  <meta name="description" content="Organize homework, projects, quizzes and exams from Canvas for Florida Atlantic University students, with Open-Meteo campus weather." />
+  <meta name="theme-color" content="#003366" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23003366'/><text x='32' y='42' font-family='Arial' font-weight='700' font-size='26' text-anchor='middle' fill='white'>OD</text><rect x='10' y='50' width='44' height='4' fill='%23CC0000'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="planner.css" />
+</head>
+<body>
+  <!-- Global navigation (Canvas-style) -->
+  <nav class="global-nav" aria-label="Main">
+    <a class="brand" href="#dashboard" title="Owl Deadlines">
+      <span class="brand-mark">FAU</span>
+      <span class="brand-sub">Deadlines</span>
+    </a>
+    <a class="nav-item" href="#dashboard" data-view="dashboard"><span class="nav-ico">🏠</span><span>Dashboard</span></a>
+    <a class="nav-item" href="#todo" data-view="todo"><span class="nav-ico">✅</span><span>To Do</span><b id="nav-badge" class="nav-badge" hidden>0</b></a>
+    <a class="nav-item" href="#calendar" data-view="calendar"><span class="nav-ico">📅</span><span>Calendar</span></a>
+    <a class="nav-item" href="#courses" data-view="courses"><span class="nav-ico">📚</span><span>Courses</span></a>
+    <a class="nav-item" href="#sync" data-view="sync"><span class="nav-ico">🔄</span><span>Canvas Sync</span></a>
+    <a class="nav-item" href="../weather/"><span class="nav-ico">🌤️</span><span>Weather</span></a>
+  </nav>
+
+  <div class="layout">
+    <header class="page-header">
+      <div class="crumbs">
+        <span class="crumb-root">FAU</span>
+        <span class="crumb-sep">›</span>
+        <h1 id="page-title">Dashboard</h1>
+      </div>
+      <div class="header-actions">
+        <button id="sync-btn" class="btn btn-secondary" type="button" title="Sync with Canvas">🔄 <span>Sync</span></button>
+        <button id="add-btn" class="btn btn-primary" type="button">+ <span>Add deadline</span></button>
+      </div>
+    </header>
+
+    <div class="content-wrap">
+      <main id="main" class="main">
+        <!-- DASHBOARD -->
+        <div id="demo-banner" class="demo-banner" hidden>
+          <span>👀 <b>You're viewing sample deadlines</b> for an imaginary FAU MSBA semester. Connect your real Canvas calendar to replace them.</span>
+          <span class="banner-actions">
+            <a class="btn btn-primary" href="#sync">Connect Canvas</a>
+            <button id="banner-remove" class="btn btn-secondary" type="button">Clear samples</button>
+          </span>
+        </div>
+        <section id="view-dashboard" class="view">
+          <div class="greeting">
+            <h2 id="greet">Welcome, Owl!</h2>
+            <p id="greet-sub" class="muted"></p>
+          </div>
+
+          <div class="stats">
+            <button class="stat stat-overdue" data-jump="overdue"><span class="stat-num" id="s-overdue">0</span><span class="stat-label">Overdue</span></button>
+            <button class="stat stat-today" data-jump="today"><span class="stat-num" id="s-today">0</span><span class="stat-label">Due today</span></button>
+            <button class="stat stat-week" data-jump="week"><span class="stat-num" id="s-week">0</span><span class="stat-label">Next 7 days</span></button>
+            <button class="stat stat-exams" data-jump="exam"><span class="stat-num" id="s-exams">0</span><span class="stat-label">Upcoming exams</span></button>
+          </div>
+
+          <div class="type-legend" id="type-breakdown"></div>
+
+          <h3 class="section-title">Course Cards</h3>
+          <div id="dash-cards" class="course-cards"></div>
+          <p id="dash-empty" class="empty" hidden>
+            No deadlines yet. Go to <a href="#sync">Canvas Sync</a> to import your FAU Canvas calendar, or click <b>+ Add deadline</b>.<br /><br />
+            <button id="demo-btn" class="btn btn-primary" type="button">👀 Show sample deadlines</button>
+          </p>
+        </section>
+
+        <!-- TO DO -->
+        <section id="view-todo" class="view" hidden>
+          <div class="toolbar">
+            <input id="f-search" type="search" placeholder="Search deadlines…" aria-label="Search deadlines" />
+            <select id="f-course" aria-label="Filter by course"><option value="">All courses</option></select>
+            <select id="f-range" aria-label="Filter by time">
+              <option value="">Any time</option>
+              <option value="overdue">Overdue</option>
+              <option value="today">Today</option>
+              <option value="week">Next 7 days</option>
+              <option value="month">Next 30 days</option>
+            </select>
+            <label class="check"><input id="f-done" type="checkbox" /> Show completed</label>
+          </div>
+          <div class="chips" id="f-types" role="group" aria-label="Filter by type"></div>
+          <div id="todo-list" class="todo-list"></div>
+        </section>
+
+        <!-- CALENDAR -->
+        <section id="view-calendar" class="view" hidden>
+          <div class="cal-head">
+            <div class="cal-nav">
+              <button id="cal-prev" class="btn btn-secondary" type="button" aria-label="Previous month">‹</button>
+              <button id="cal-today" class="btn btn-secondary" type="button">Today</button>
+              <button id="cal-next" class="btn btn-secondary" type="button" aria-label="Next month">›</button>
+            </div>
+            <h2 id="cal-title">Month</h2>
+          </div>
+          <div class="cal-grid-wrap">
+            <div class="cal-dow"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+            <div id="cal-grid" class="cal-grid"></div>
+          </div>
+        </section>
+
+        <!-- COURSES -->
+        <section id="view-courses" class="view" hidden>
+          <div id="course-cards" class="course-cards"></div>
+          <p id="courses-empty" class="empty" hidden>No courses yet — they appear automatically after a Canvas sync.</p>
+        </section>
+
+        <!-- SYNC / SETTINGS -->
+        <section id="view-sync" class="view" hidden>
+          <div class="card">
+            <h3>1. Connect your FAU Canvas calendar feed</h3>
+            <ol class="steps">
+              <li>Log in to Canvas at <b>canvas.fau.edu</b> and open <b>Calendar</b> in the left menu.</li>
+              <li>At the bottom of the right sidebar, click <b>Calendar Feed</b>.</li>
+              <li>Copy the link (it looks like <code>https://fau.instructure.com/feeds/calendars/user_….ics</code>) and paste it below.</li>
+            </ol>
+            <form id="feed-form" class="feed-form">
+              <input id="feed-url" type="url" placeholder="https://fau.instructure.com/feeds/calendars/user_XXXX.ics" aria-label="Canvas calendar feed URL" />
+              <button class="btn btn-primary" type="submit">Save &amp; Sync</button>
+            </form>
+            <p id="sync-status" class="muted small"></p>
+            <p class="muted small">🔒 The feed link is stored only in this browser. It is sent to this site's Netlify function only to fetch the calendar (Canvas blocks direct browser requests).</p>
+          </div>
+
+          <div class="card">
+            <h3>2. …or upload an .ics file</h3>
+            <p class="muted small">Open the feed link in your browser to download it, then upload the file here. Works even without the Netlify function.</p>
+            <input id="ics-file" type="file" accept=".ics,text/calendar" />
+          </div>
+
+          <div class="card">
+            <h3>Preferences</h3>
+            <div class="form-grid">
+              <label>Your name
+                <input id="pref-name" type="text" maxlength="30" placeholder="Owl" />
+              </label>
+              <label>Campus (for weather)
+                <select id="pref-campus"></select>
+              </label>
+              <label class="check"><input id="pref-events" type="checkbox" /> Include regular calendar events (not just assignments)</label>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Data</h3>
+            <div class="btn-row">
+              <button id="export-btn" class="btn btn-secondary" type="button">⬇️ Export backup</button>
+              <label class="btn btn-secondary file-btn">⬆️ Restore backup<input id="restore-file" type="file" accept="application/json" hidden /></label>
+              <button id="clear-demo-btn" class="btn btn-secondary" type="button">Remove sample deadlines</button>
+              <button id="clear-canvas-btn" class="btn btn-danger" type="button">Remove Canvas items</button>
+              <button id="reset-btn" class="btn btn-danger" type="button">Reset everything</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Right sidebar (Canvas-style To Do / Coming Up) -->
+      <aside class="sidebar">
+        <div class="side-block weather-block">
+          <div class="side-title">
+            <span>Weather · <span id="w-campus">Boca Raton</span></span>
+          </div>
+          <div id="w-now" class="w-now muted">Loading weather…</div>
+          <div id="w-days" class="w-days"></div>
+          <p class="tiny muted">Weather by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a></p>
+        </div>
+        <div class="side-block">
+          <div class="side-title"><span>Coming Up</span><a href="#todo" class="small">View all</a></div>
+          <ul id="side-upcoming" class="side-list"></ul>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="footer">
+      Owl Deadlines v1.2 · Student-made planner for FAU Owls. Not affiliated with Florida Atlantic University or Instructure Canvas.
+    </footer>
+  </div>
+
+  <!-- Add / edit modal -->
+  <dialog id="modal" class="modal" aria-labelledby="modal-title">
+    <form id="item-form" method="dialog">
+      <header class="modal-head">
+        <h2 id="modal-title">Add deadline</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close">✕</button>
+      </header>
+      <div class="modal-body form-grid">
+        <p id="i-canvas-note" class="span-2 muted small" hidden>🔄 Imported from Canvas — title and due date update automatically on sync. You can change the type, notes and completion.</p>
+        <label class="span-2">Title
+          <input id="i-title" type="text" required maxlength="200" placeholder="e.g. Midterm Exam" />
+        </label>
+        <label>Course
+          <input id="i-course" type="text" list="course-list" maxlength="100" placeholder="e.g. ISM6247" />
+          <datalist id="course-list"></datalist>
+        </label>
+        <label>Type
+          <select id="i-type"></select>
+        </label>
+        <label>Due date
+          <input id="i-date" type="date" required />
+        </label>
+        <label>Due time
+          <input id="i-time" type="time" value="23:59" />
+        </label>
+        <label class="span-2">Canvas link (optional)
+          <input id="i-url" type="url" placeholder="https://fau.instructure.com/courses/…" />
+        </label>
+        <label class="span-2">Notes
+          <textarea id="i-notes" rows="3" maxlength="2000"></textarea>
+        </label>
+      </div>
+      <footer class="modal-foot">
+        <button id="i-delete" type="button" class="btn btn-danger" hidden>Delete</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn btn-secondary" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="planner.js"></script>
+</body>
+</html>

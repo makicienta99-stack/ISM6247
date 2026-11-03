@@ -1,4 +1,25 @@
-# ISM6247 – Owl Deadlines (FAU Canvas planner)
+# ISM6247 – Kamahe Allegro shop + Owl Deadlines
+
+## Kamahe Allegro (main page `/`)
+Online shop for **Kamahe Allegro** ([@kamaheallegro](https://www.instagram.com/kamaheallegro/)), a Peruvian brand of
+colorful clothing for young people made with **100% Peruvian cotton**. The design uses the Instagram gradient colors
+(yellow #feda75, orange #fa7e1e, pink #d62976, purple #962fbf, blue #4f5bd5) with Grand Hotel + Montserrat typography (Google Fonts).
+
+- Shop grid with filters (Tops, Hoodies, Bottoms, Sets) and Instagram-style story highlights
+- Product view with color and size, shopping bag saved in the browser
+- **Order by Instagram DM**: copies the order and opens the chat with @kamaheallegro (no payment processor needed yet)
+- **Outfit of the day**: weather from the free [Open-Meteo API](https://open-meteo.com/) for Boca Raton, Miami, Orlando, New York, Lima, Cusco or Arequipa, with clothing picks for the temperature
+- Light/dark mode, works on phones
+- Edit products and prices in `shop.js` (`PRODUCTS`). Add real photos in `images/products/` (see the README there)
+
+| File | Purpose |
+|------|---------|
+| `index.html` | Shop page |
+| `shop.css` | Instagram-style theme |
+| `shop.js` | Catalog, bag, Instagram DM order, Open-Meteo outfit picks |
+| `images/logo.svg` | Logo (replace with your real logo if you want) |
+
+## Owl Deadlines (FAU Canvas planner, now at `/planner/`)
 
 A deadline organizer for **Florida Atlantic University** students. It pulls homework, projects,
 quizzes and exams from your FAU Canvas calendar and shows them in a Canvas-style layout in FAU
@@ -30,9 +51,9 @@ blue (#003366) and red (#CC0000). Weather for your campus comes from the free
 ## Files
 | File | Purpose |
 |------|---------|
-| `index.html` | Planner page structure |
-| `planner.css` | Canvas-style FAU theme |
-| `planner.js` | Canvas feed parsing, deadlines, calendar, Open-Meteo weather |
+| `planner/index.html` | Planner page structure |
+| `planner/planner.css` | Canvas-style FAU theme |
+| `planner/planner.js` | Canvas feed parsing, deadlines, calendar, Open-Meteo weather |
 | `netlify/functions/canvas-feed.mjs` | Small server function that downloads the Canvas feed (Canvas blocks browsers from fetching it directly). It only accepts `*.instructure.com` / `*.fau.edu` calendar feed links. |
 | `netlify.toml` | Netlify config (publishes the repo root, no build step, functions folder) |
 | `weather/` | The earlier Glass Weather app |
@@ -48,6 +69,6 @@ Leave the build command empty. The publish directory (`.`) and functions folder 
 ```bash
 python3 -m http.server 8000
 ```
-Then open http://localhost:8000. To test link sync locally, run `netlify dev` (Netlify CLI) instead.
+Then open http://localhost:8000 (shop) or http://localhost:8000/planner/ (planner). To test link sync locally, run `netlify dev` (Netlify CLI) instead.
 
 *Made by a student for FAU Owls. Not affiliated with Florida Atlantic University or Instructure Canvas.*
